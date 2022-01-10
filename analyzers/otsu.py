@@ -22,9 +22,6 @@ def process_image(pil_image, values):
     img = np.array(pil_image)
     selected_channels = [values["-OTSU RED CHANNEL-"], values["-OTSU GREEN CHANNEL-"], values["-OTSU BLUE CHANNEL-"]]
 
-    def mask_channels(img, selected_channels):
-        img[..., np.where(np.invert(selected_channels))] = 0
-
     if np.where(selected_channels)[0].size == 1:
         threshold_global_otsu = threshold_otsu(img[..., np.where(selected_channels)[0][0]])
         global_otsu = img[..., np.where(selected_channels)[0][0]] >= threshold_global_otsu
