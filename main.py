@@ -10,6 +10,12 @@ import analyzers.otsu
 
 
 DEFAULT_FOLDER = r"D:\Downloads"
+EVENT_TO_LAYOUT = {
+    "Viewer": "-DEFAULT LAYOUT-",
+    "Canny Edge Detection": "-CANNY LAYOUT-",
+    "Otsu": "-OTSU LAYOUT-",
+    "Video Fun": "-VIDEO LAYOUT-",
+}
 
 
 def get_file_names(folder):
@@ -22,6 +28,13 @@ def get_file_names(folder):
                   if os.path.isfile(os.path.join(folder, f)) and f.lower().endswith((".png", ".gif", ".bmp"))]
 
     return file_names
+
+
+def switch_layout(window, event, previous_layout):
+    window[previous_layout].update(visible=False)
+    new_layout = EVENT_TO_LAYOUT[event]
+    window[new_layout].update(visible=True)
+    return new_layout
 
 
 def get_layout():
@@ -79,7 +92,7 @@ def run_app():
 
     cap = cv2.VideoCapture(0)
     current_pil_image = None
-    chosen_layout = "Viewer"
+    chosen_layout = "-DEFAULT LAYOUT-"
 
     while True:
         event, values = window.read(timeout=20)
@@ -103,20 +116,12 @@ def run_app():
             window["-IMAGE-"].update(data=ImageTk.PhotoImage(current_pil_image))
 
         if event == "Viewer":
-            chosen_layout = event
-            window["-CANNY LAYOUT-"].update(visible=False)
-            window["-OTSU LAYOUT-"].update(visible=False)
-            window["-VIDEO LAYOUT-"].update(visible=False)
-            window["-DEFAULT LAYOUT-"].update(visible=True)
+            chosen_layout = switch_layout(window, event, chosen_layout)
 
         if event == "Video Fun":
-            chosen_layout = event
-            window["-DEFAULT LAYOUT-"].update(visible=False)
-            window["-CANNY LAYOUT-"].update(visible=False)
-            window["-OTSU LAYOUT-"].update(visible=False)
-            window["-VIDEO LAYOUT-"].update(visible=True)
+            chosen_layout = switch_layout(window, event, chosen_layout)
 
-        elif chosen_layout == "Video Fun":
+        elif chosen_layout == "-VIDEO LAYOUT-":
             ret, frame = cap.read()
 
             frame = analyzers.video_fun.process_frame(frame, values)
@@ -127,13 +132,9 @@ def run_app():
             window["-IMAGE-"].update(data=img_bytes)
 
         if event == "Canny Edge Detection":
-            chosen_layout = "Canny Edge Detection"
-            window["-DEFAULT LAYOUT-"].update(visible=False)
-            window["-VIDEO LAYOUT-"].update(visible=False)
-            window["-OTSU LAYOUT-"].update(visible=False)
-            window["-CANNY LAYOUT-"].update(visible=True)
+            chosen_layout = switch_layout(window, event, chosen_layout)
 
-        elif chosen_layout == "Canny Edge Detection":
+        elif chosen_layout == "-CANNY LAYOUT-":
             try:
                 pil_image = analyzers.canny.process_image(current_pil_image, values)
                 window["-IMAGE-"].update(data=ImageTk.PhotoImage(pil_image))
@@ -141,13 +142,9 @@ def run_app():
                 pass
 
         if event == "Otsu":
-            chosen_layout = "Otsu"
-            window["-DEFAULT LAYOUT-"].update(visible=False)
-            window["-VIDEO LAYOUT-"].update(visible=False)
-            window["-CANNY LAYOUT-"].update(visible=False)
-            window["-OTSU LAYOUT-"].update(visible=True)
+            chosen_layout = switch_layout(window, event, chosen_layout)
 
-        elif chosen_layout == "Otsu":
+        elif chosen_layout == "-OTSU LAYOUT-":
             try:
                 pil_image = analyzers.otsu.process_image(current_pil_image, values)
                 window["-IMAGE-"].update(data=ImageTk.PhotoImage(pil_image))
