@@ -42,7 +42,17 @@ def process_image(pil_image, values):
         img[..., np.where(np.invert(selected_channels))] = 0
 
     if values["-APPLY CANNY-"]:
-        if np.where(selected_channels)[0].size == 1:
+        if np.where(selected_channels)[0].size == 1 and len(img.shape) == 2:
+            selected_img = img.copy()
+            selected_img = 255 * np.asarray(feature.canny(selected_img,
+                                                          values["-CANNY BLUR-"],
+                                                          values["-CANNY LOW-"],
+                                                          values["-CANNY HIGH-"]), dtype=np.uint8)
+            if values["-OVERLAY WITH IMAGE-"]:
+                img[np.where(selected_img)] = 255
+            else:
+                img = selected_img
+        elif np.where(selected_channels)[0].size == 1:
             selected_img = img[..., np.where(selected_channels)[0][0]].copy()
             selected_img = 255 * np.asarray(feature.canny(selected_img,
                                                           values["-CANNY BLUR-"],
@@ -54,7 +64,6 @@ def process_image(pil_image, values):
             else:
                 img[..., np.where(selected_channels)[0][0]] = selected_img
                 mask_channels(img, selected_channels)
-
     else:
         if len(img.shape) == 3:
             mask_channels(img, selected_channels)

@@ -2,7 +2,6 @@ import os
 import PySimpleGUI as sg
 import cv2.cv2 as cv2
 import numpy as np
-from skimage import feature
 from PIL import Image, ImageTk
 
 import analyzers.video_fun
