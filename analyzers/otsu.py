@@ -36,7 +36,16 @@ def process_image(pil_image, values):
     img = np.array(pil_image)
     selected_channels = [values["-OTSU RED CHANNEL-"], values["-OTSU GREEN CHANNEL-"], values["-OTSU BLUE CHANNEL-"]]
 
-    if np.where(selected_channels)[0].size == 1:
+    if np.where(selected_channels)[0].size == 1 and len(img.shape) == 2:
+        if values["-APPLY LOCAL OTSU-"]:
+            radius = values["-LOCAL OTSU SIZE-"]
+            local_mask = disk(radius) if values["-LOCAL OTSU SHAPE-"] == "Disk" else rectangle(int(radius), int(radius))
+            local_otsu = img >= rank.otsu(img, local_mask)
+            ret_img = Image.fromarray(255 * np.asarray(local_otsu, dtype=np.uint8))
+        else:
+            global_otsu = img >= threshold_otsu(img)
+            ret_img = Image.fromarray(255 * np.asarray(global_otsu, dtype=np.uint8))
+    elif np.where(selected_channels)[0].size == 1:
         if values["-APPLY LOCAL OTSU-"]:
             radius = values["-LOCAL OTSU SIZE-"]
             local_mask = disk(radius) if values["-LOCAL OTSU SHAPE-"] == "Disk" else rectangle(int(radius), int(radius))
